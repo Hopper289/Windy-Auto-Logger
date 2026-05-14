@@ -1,0 +1,39 @@
+name: build-and-run
+on:
+  schedule:
+    - cron: '0 * * * *' # Cài đặt tự động chạy mỗi giờ 1 lần
+  workflow_dispatch: # Cho phép bạn có nút bấm chạy bằng tay
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Tải code về máy chủ ảo
+        uses: actions/checkout@v4
+
+      - name: Cài đặt công cụ NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Tải các thư viện bị thiếu (Restore)
+        run: nuget restore WindyDataLogger.csproj
+
+      - name: Cài đặt trình biên dịch MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Biên dịch code thành file .exe
+        run: msbuild WindyDataLogger.csproj /p:Configuration=Release
+
+      - name: Chạy file .exe vừa tạo
+        run: .\bin\Release\WindyDataLogger.exe
+
+      - name: Lưu file CSV trở lại GitHub
+        run: |
+          git config --global user.name "Robot PBL6"
+          git config --global user.email "bot@action.com"
+          git add WindyHistory.csv
+          git commit -m "Tự động cập nhật dữ liệu lịch sử" || echo "Không có thay đổi mới"
+          
+          # Dòng lệnh ma thuật giúp chống lỗi xung đột
+          git pull origin master --rebase
+          
+          git push
