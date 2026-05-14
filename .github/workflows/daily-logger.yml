@@ -15,7 +15,7 @@ jobs:
         uses: NuGet/setup-nuget@v2
 
       - name: Tải các thư viện bị thiếu (Restore)
-        run: nuget restore WindyDataLogger.csproj
+        run: nuget restore WindyDataLogger.csproj -PackagesDirectory packages
 
       - name: Cài đặt trình biên dịch MSBuild
         uses: microsoft/setup-msbuild@v2
